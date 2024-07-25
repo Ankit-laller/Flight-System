@@ -77,18 +77,36 @@ namespace Flight_System.Repo
             return new ResponseClass(success: false, message: "Booking is not canceled");
         }
 
-        public async Task<IEnumerable<FlightBooking>> getBookings()
+        public async Task<int> dataSize()
         {
-            var query = "select * from FlightBookingTable where booked = 1 order by timestamp desc";
+            var query = "select flightId from FlightBookingTable where booked = 1";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("ForwarderConnectionString")))
             {
                 var data = await connection.QueryAsync<FlightBooking>(query);
+                return data.Count();
+            }
+            
+        }
+
+        public async Task<BookedFlightResponse> getBookings(int PageNumber, int PageSize)
+        {
+            var query = "select * from FlightBookingTable where booked = 1 ";
+            var query2 = "select * from FlightBookingTable where booked = 1 order by timestamp desc OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+            var offset = (PageNumber - 1) * PageSize;
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("ForwarderConnectionString")))
+            {
+                var data = await connection.QueryAsync<FlightBooking>(query2, new {Offset=offset, @PageSize=PageSize});
                 if (data != null)
                 {
-                    return data;
+                    var dataSize = await connection.QueryAsync<FlightBooking>(query);
+                    if (dataSize != null)
+                    {
+                        return new BookedFlightResponse(FlightBookingData: data.ToList(), success: true, message: "got the data", length: dataSize.Count());
+
+                    }
                 }
             }
-            return new List<FlightBooking>();
+            return new BookedFlightResponse();
         }
 
         public async Task<IEnumerable<FlightBooking>> searchFlight(SearchFlightDto value)
@@ -115,7 +133,6 @@ namespace Flight_System.Repo
             var query = @"
             UPDATE FlightBookingTable 
             SET 
-            
             cargoWeight = @CargoWeight,
             cargo = @Cargo,
             timestamp=@TimeStamp

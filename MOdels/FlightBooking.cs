@@ -58,6 +58,8 @@
         public bool success { get; set; }
         public string message { get; set; }
         public FlightBooking FlightBookingData { get; set; }
+
+
         public ResponseClass(FlightBooking FlightBookingData, bool success, string message)
         {
             this.success = success;
@@ -68,6 +70,31 @@
         {
             this.success = success;
             this.message = message;
+        }
+       
+    }
+
+    public class BookedFlightResponse
+    {
+        public bool success { get; set; }
+        public string message { get; set; }
+        public List<FlightBooking> FlightBookingData { get; set; }
+        public int length { get; set; }
+
+        public BookedFlightResponse(bool success = false, string message = "error", int length = 0)
+        {
+            this.success = success;
+            this.message = message;
+            this.length = length;
+        }
+
+        public BookedFlightResponse(List<FlightBooking> FlightBookingData , bool success=false, string message="error", int length=0)
+        {
+            this.success = success;
+            this.message = message;
+            this.FlightBookingData = FlightBookingData;
+            this.length = length;
+
         }
     }
 

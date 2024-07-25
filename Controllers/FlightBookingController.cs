@@ -32,10 +32,16 @@ namespace Flight_System.Controllers
 
         // GET api/<FlightBookingController>/5
         [HttpGet("getBooking")]
-        public async Task<ActionResult> Get()
+        public async Task<ActionResult> Get([FromQuery] int PageNumber,[FromQuery] int PageSize)
         {
-            var data = await flightBooking.getBookings();
+            var data = await flightBooking.getBookings(PageNumber,PageSize);
             return Ok(data);
+        }
+        [HttpGet("dataSize")]
+        public async Task<int> GetSize()
+        {
+            var data = await flightBooking.dataSize();
+            return (data);
         }
 
         // POST api/<FlightBookingController>
